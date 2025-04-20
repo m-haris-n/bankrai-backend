@@ -11,7 +11,7 @@ const PLAID_SECRET = process.env.PLAID_SECRET;
 const ENVIRONMENT = process.env.PLAID_ENV;
 
 const config = new Configuration({
-   basePath: PlaidEnvironments.sandbox,
+   basePath: ENVIRONMENT === "sandbox" ? PlaidEnvironments.sandbox : PlaidEnvironments.production,
    baseOptions: {
       headers: { 
          'PLAID-CLIENT-ID': PLAID_CLIENT_ID, 

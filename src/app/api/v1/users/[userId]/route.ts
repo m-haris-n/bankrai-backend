@@ -2,16 +2,23 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { supabaseAdmin } from '@/lib/supabase'
 
+type RouteContext = {
+  params: Promise<{
+    userId: string
+  }>
+}
+
 // Get user profile
 export async function GET(
   request: Request,
-  { params }: { params: { userId: string } }
+  context: RouteContext
 ) {
   try {
     const authUserId = request.headers.get('x-user-id')!
+    const { userId } = await context.params
 
     // Users can only view their own profile
-    if (authUserId !== params.userId) {
+    if (authUserId !== userId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -20,7 +27,7 @@ export async function GET(
 
     const user = await prisma.user.findUnique({
       where: {
-        id: params.userId
+        id: userId
       }
     })
 
@@ -44,14 +51,15 @@ export async function GET(
 // Update user profile
 export async function PATCH(
   request: Request,
-  { params }: { params: { userId: string } }
+  context: RouteContext
 ) {
   try {
     const authUserId = request.headers.get('x-user-id')!
+    const { userId } = await context.params
     const { fullName } = await request.json()
 
     // Users can only update their own profile
-    if (authUserId !== params.userId) {
+    if (authUserId !== userId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -60,7 +68,7 @@ export async function PATCH(
 
     const user = await prisma.user.update({
       where: {
-        id: params.userId
+        id: userId
       },
       data: {
         fullName
@@ -80,13 +88,14 @@ export async function PATCH(
 // Delete user and all associated data
 export async function DELETE(
   request: Request,
-  { params }: { params: { userId: string } }
+  context: RouteContext
 ) {
   try {
     const authUserId = request.headers.get('x-user-id')!
+    const { userId } = await context.params
 
     // Users can only delete their own account
-    if (authUserId !== params.userId) {
+    if (authUserId !== userId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -95,7 +104,7 @@ export async function DELETE(
 
     // Get user email before deletion for Supabase Auth
     const user = await prisma.user.findUnique({
-      where: { id: params.userId }
+      where: { id: userId }
     })
 
     if (!user) {
@@ -108,7 +117,7 @@ export async function DELETE(
     // Delete user (cascade will handle related records)
     await prisma.user.delete({
       where: {
-        id: params.userId
+        id: userId
       }
     })
 

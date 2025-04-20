@@ -4,29 +4,40 @@ import { MessageRole } from "@/generated/prisma";
 import { getMasterPrompt, masterPrompt } from "@/utils/prompts";
 import { countGeminiTokens } from "@/utils/helpers";
 
+type RouteContext = {
+   params: Promise<{
+      chatId: string;
+   }>;
+};
+
 // Get all messages in a chat
 export async function GET(
    request: Request,
-   { params }: { params: { chatId: string } }
+   context: RouteContext
 ) {
    try {
-      const userId = request.headers.get("x-user-id")!;
+      const authUserId = request.headers.get("x-user-id")!;
+      const { chatId } = await context.params;
 
-      // First check if the chat belongs to the user
+      // Get chat to verify ownership
       const chat = await prisma.chat.findUnique({
          where: {
-            id: params.chatId,
-            userId,
+            id: chatId,
+            userId: authUserId,
          },
       });
 
       if (!chat) {
-         return NextResponse.json({ error: "Chat not found" }, { status: 404 });
+         return NextResponse.json(
+            { error: "Chat not found or unauthorized" },
+            { status: 404 }
+         );
       }
 
+      // Get messages for the chat
       const messages = await prisma.message.findMany({
          where: {
-            chatId: params.chatId,
+            chatId: chatId,
          },
          orderBy: {
             createdAt: "asc",
@@ -46,12 +57,12 @@ export async function GET(
 // Create a new message
 export async function POST(
    request: Request,
-   { params }: { params: { chatId: string } }
+   context: RouteContext
 ) {
    try {
       const userId = request.headers.get("x-user-id")!;
       const { content } = await request.json();
-      const {chatId} = await params;
+      const { chatId } = await context.params;
 
       if (!content) {
          return NextResponse.json(

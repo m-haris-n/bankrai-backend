@@ -1,18 +1,25 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// Get a single chat with its messages
+type RouteContext = {
+  params: Promise<{
+    chatId: string
+  }>
+}
+
+// Get chat details
 export async function GET(
   request: Request,
-  { params }: { params: { chatId: string } }
+  context: RouteContext
 ) {
   try {
-    const userId = request.headers.get('x-user-id')!
-    const {chatId} = await params;
+    const authUserId = request.headers.get('x-user-id')!
+    const { chatId } = await context.params
+
     const chat = await prisma.chat.findUnique({
       where: {
         id: chatId,
-        userId
+        userId: authUserId
       },
       include: {
         messages: {
@@ -25,7 +32,7 @@ export async function GET(
 
     if (!chat) {
       return NextResponse.json(
-        { error: 'Chat not found' },
+        { error: 'Chat not found or unauthorized' },
         { status: 404 }
       )
     }
@@ -40,19 +47,20 @@ export async function GET(
   }
 }
 
-// Update a chat
+// Update chat
 export async function PATCH(
   request: Request,
-  { params }: { params: { chatId: string } }
+  context: RouteContext
 ) {
   try {
-    const userId = request.headers.get('x-user-id')!
+    const authUserId = request.headers.get('x-user-id')!
+    const { chatId } = await context.params
     const { title, isArchived } = await request.json()
 
     const chat = await prisma.chat.update({
       where: {
-        id: params.chatId,
-        userId
+        id: chatId,
+        userId: authUserId
       },
       data: {
         title,
@@ -70,22 +78,26 @@ export async function PATCH(
   }
 }
 
-// Delete a chat
+// Delete chat
 export async function DELETE(
   request: Request,
-  { params }: { params: { chatId: string } }
+  context: RouteContext
 ) {
   try {
-    const userId = request.headers.get('x-user-id')!
+    const authUserId = request.headers.get('x-user-id')!
+    const { chatId } = await context.params
 
     await prisma.chat.delete({
       where: {
-        id: params.chatId,
-        userId
+        id: chatId,
+        userId: authUserId
       }
     })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json(
+      { message: 'Chat deleted successfully' },
+      { status: 200 }
+    )
   } catch (error) {
     console.error('Delete chat error:', error)
     return NextResponse.json(
