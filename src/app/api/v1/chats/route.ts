@@ -46,7 +46,6 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-    console.log("Creating chat with user id", userId, title)
     const chat = await prisma.chat.create({
       data: {
         title,

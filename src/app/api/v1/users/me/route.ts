@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 export async function GET(request: Request) {
   try {
     // Get session from Supabase Auth
-    console.log("Getting session")
     const { data: { session }, error } = await supabase.auth.getSession()
 
     if (error || !session) {

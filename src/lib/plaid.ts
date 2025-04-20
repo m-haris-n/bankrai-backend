@@ -36,11 +36,9 @@ class PlaidClient {
             cursor: cursor,
             count: 500,
          };
-         console.log("Request: ", request)
          const response = await this.plaidApi.transactionsSync(request);
          return response.data;
       } catch (error) {
-         console.log("Error fetching transactions:", JSON.stringify(error));
          throw error;
       }
    }

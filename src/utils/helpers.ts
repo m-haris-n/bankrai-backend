@@ -94,7 +94,6 @@ export const updateTransactionHistory = async (userId: string) => {
         plaidIntegration: true,
        },
      });
-     console.log("User: ", user)
      let cursor = "";
      let cleanedAccounts: PlaidAccount[] = [];
      let cleanedTransactions: PlaidTransaction[] = [];

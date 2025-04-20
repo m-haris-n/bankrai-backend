@@ -59,7 +59,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "User not updated" });
       }
     } catch (error) {
-      console.log(error);
       if (error instanceof Error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }

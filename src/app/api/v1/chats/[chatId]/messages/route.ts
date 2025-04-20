@@ -98,7 +98,6 @@ export async function POST(
                userId,
             },
          });
-      console.log("Transaction history: ", transactionHistory)
       // Format request for Python backend
       const chatRequest = {
          message: content,
@@ -143,7 +142,6 @@ export async function POST(
 
       const data = await response.json();
       const aiResponse = data.response;
-      console.log("AI response: ", data)
       if(!data.response){
          return NextResponse.json(
             { error: "No response from AI" },
