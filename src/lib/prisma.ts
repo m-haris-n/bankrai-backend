@@ -1,18 +1,38 @@
-import { PrismaClient } from "@/generated/prisma"
+/**
+ * Exports the Prisma client. This is only available in the server. Importing
+ * this in frontend code will throw an error.
+ *
+ * @example
+ * ```ts
+ * import { prisma } from "@/prisma/client";
+ * ```
+ */
+import { PrismaClient } from "@/generated/prisma"; 
+export type { PrismaClient };
 
-PrismaClient
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: [
+      {
+        emit: "event",
+        level: "query",
+      },
+    ],
+  });
+};
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+declare const globalThis: {
+  prismaGlobal: PrismaClient;
+} & typeof global;
+
+export const prisma =
+  globalThis.prismaGlobal ?? (prismaClientSingleton() as PrismaClient);
 
 // Log all queries if the DEBUG environment variable is set
 if (process.env.DEBUG === "true") {
-    (prisma.$on as any)("query", async (e: any) => {
-      console.log(`${e.query} ${e.params}`);
-    });
-  }
-  
+  (prisma.$on as any)("query", async (e: any) => {
+    console.log(`${e.query} ${e.params}`);
+  });
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
