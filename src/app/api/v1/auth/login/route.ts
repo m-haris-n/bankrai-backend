@@ -21,8 +21,9 @@ export async function POST(request: Request) {
     })
 
     if (!user) {
+      console.error('User not found')
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { error: 'User not found' },
         { status: 401 }
       )
     }
@@ -34,8 +35,9 @@ export async function POST(request: Request) {
     })
 
     if (authError) {
+      console.error(authError)
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { error: authError.message },
         { status: 401 }
       )
     }
