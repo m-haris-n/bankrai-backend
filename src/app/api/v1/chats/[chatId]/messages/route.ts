@@ -113,7 +113,7 @@ export async function POST(
                role: "model",
                content: "Sure, understood.",
             },
-            ...messageHistory.map((msg) => ({
+            ...messageHistory?.map((msg) => ({
                role: msg.role,
                content: msg.content,
             })),
