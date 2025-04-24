@@ -8,7 +8,7 @@ export async function GET(request: Request) {
 
     if (type === 'confirm-email') {
       // Redirect to mobile app home page using custom URL scheme
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/confirm-email`)
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/confirm-email`)
     }
 
     return NextResponse.json({ type }, { status: 200 })
