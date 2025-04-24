@@ -2,6 +2,7 @@ import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { encrypt } from "@/utils/crypto";
+import { updateTransactionHistory } from "@/utils/helpers";
 
 const configuration = new Configuration({
   basePath: PlaidEnvironments.sandbox,
@@ -53,6 +54,8 @@ export async function POST(req: Request) {
         },
       });
 
+      await updateTransactionHistory(body.user_id)
+      
       if (updatedUser) {
         return NextResponse.json({ is_plaid_connect: true });
       } else {

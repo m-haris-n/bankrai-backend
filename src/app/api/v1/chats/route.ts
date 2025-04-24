@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { updateTransactionHistory } from '@/utils/helpers'
 
 // Get all chats for a user
 export async function GET(request: Request) {
   try {
     const userId = request.headers.get('x-user-id')!
+    await updateTransactionHistory(userId)
 
     const chats = await prisma.chat.findMany({
       where: {
@@ -38,8 +40,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const userId = request.headers.get('x-user-id')!
+    await updateTransactionHistory(userId)
     const { title } = await request.json()
-
     if (!title) {
       return NextResponse.json(
         { error: 'Title is required' },
